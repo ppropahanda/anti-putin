@@ -10,17 +10,6 @@ function contains(value, arr) {
 self.port.on("replaceShit", function(message) {
 	console.log("!!! Before handler !!!");
 
-	// $('body').find('*')
-	//   .contents()
-	//   .filter(function(){
-	//     return this.nodeType !== 1;
-	//   })
-	//   .wrap("<span style='color:red;'></span>");
-
-	// $("*").each(function () {
- //        $(this).text($(this).text().replace(new RegExp(value, "ig"), message));
-	// });
-
 	$.each(keywords, function(index, value) {
 		console.log("*** Replace: ", value);
 		try {

@@ -15,7 +15,7 @@ var keywordsDict = {
 // contents with the message payload.
 self.port.on("replaceShit", function () {
     $.each(keywordsDict, function (key, value) {
-        console.log("*** Replace: " + key + " with " + value);
+        // console.log("*** Replace: " + key + " with " + value);
         try {
             var replaced = $("body").html().replace(new XRegExp(key, "ig"), value);
             $("body").html(replaced);

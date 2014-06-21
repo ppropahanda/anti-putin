@@ -1,0 +1,6 @@
+help:
+https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials#getting-started
+
+build:
+https://addons.mozilla.org/en-US/firefox/addon/anti-putin/
+

@@ -2,7 +2,7 @@
 // @author: Iryna V.
 //
 
-var keywords = ["путин", "путін", "putin", "putyn"];
+var keywords = ["путин", "пу́тин", "путін", "putin", "putyn"];
 
 // "self" is a global object in content scripts
 // Listen for a message, and replace the document's

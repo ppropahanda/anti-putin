@@ -12,9 +12,9 @@ function replace(pattern, replacement) {
 }
 
 function replaceInWrappedHtmlElement(pattern, replacement, wrapperHtmlElement) {
-    var startElement = "<" + wrapperHtmlElement + ">";
+    var startElement = "<" + wrapperHtmlElement + "$1>";
     var endElement = "</" + wrapperHtmlElement + ">";
-    var patternStartElement = "\\<" + wrapperHtmlElement + "\\>";
+    var patternStartElement = "\\<" + wrapperHtmlElement + "([\\s\\w=\\'\"-]*)\\>";
     var patternEndElement = "\\<\\/" + wrapperHtmlElement + "\\>";
 
     var fixedPattern = patternStartElement + pattern + patternEndElement;
@@ -37,6 +37,7 @@ self.port.on("replaceShit", function (keywordsDict) {
         replace("\\s+" + key, " " + value);
         replace(key + "\\s+", value + " ");
 
+        replaceInWrappedHtmlElement(key, value, "span");
         replaceInWrappedHtmlElement(key, value, "strong");
         replaceInWrappedHtmlElement(key, value, "em");
         replaceInWrappedHtmlElement(key, value, "b");

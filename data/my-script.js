@@ -2,18 +2,10 @@
 // @author: Iryna V.
 //
 
-var keywordsDict = {
-    "путин": "Хула-ла",
-    "пу́тин": "Хула-ла",
-    "путін": "Хула-ла",
-    "пу́тін": "Хула-ла",
-    "putin": "Hula-la",
-    "putyn": "Hula-la"};
-
 // "self" is a global object in content scripts
 // Listen for a message, and replace the document's
 // contents with the message payload.
-self.port.on("replaceShit", function () {
+self.port.on("replaceShit", function (keywordsDict) {
     $.each(keywordsDict, function (key, value) {
         // console.log("*** Replace: " + key + " with " + value);
         try {

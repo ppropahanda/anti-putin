@@ -2,16 +2,21 @@
 // @author: Iryna V.
 //
 
-function replace(pattern, replacement) {
+function replace(html, pattern, replacement) {
+    var replacedHtml = html;
+
     try {
-        var replacedHtml = $("body").html().replace(new XRegExp(pattern, "ig"), replacement);
-        $("body").html(replacedHtml);
+        replacedHtml = html.replace(new XRegExp(pattern, "ig"), replacement);
     } catch (e) {
         console.log("!!! Error: ", e);
     }
+
+    return replacedHtml;
 }
 
-function replaceInWrappedHtmlElement(pattern, replacement, wrapperHtmlElement) {
+function replaceInWrappedHtmlElement(html, pattern, replacement, wrapperHtmlElement) {
+    var replacedHtml = html;
+
     var startElement = "<" + wrapperHtmlElement + "$1>";
     var endElement = "</" + wrapperHtmlElement + ">";
     var patternStartElement = "\\<" + wrapperHtmlElement + "([\\s\\w=\\'\"-]*)\\>";
@@ -21,26 +26,31 @@ function replaceInWrappedHtmlElement(pattern, replacement, wrapperHtmlElement) {
     var fixedReplacement = startElement + replacement + endElement;
 
     try {
-        var replacedHtml = $("body").html().replace(new XRegExp(fixedPattern, "ig"), fixedReplacement);
-        $("body").html(replacedHtml);
+        replacedHtml = html.replace(new XRegExp(fixedPattern, "ig"), fixedReplacement);
     } catch (e) {
         console.log("!!! Error: ", e);
     }
+
+    return replacedHtml;
 }
 
 // "self" is a global object in content scripts
 // Listen for a message, and replace the document's
 // contents with the message payload.
 self.port.on("replaceShit", function (keywordsDict) {
+    var html = $("body").html();
+
     $.each(keywordsDict, function (key, value) {
         // console.log("*** Replace: " + key + " with " + value);
-        replace("\\s+" + key, " " + value);
-        replace(key + "\\s+", value + " ");
+        html = replace(html, "\\s+" + key, " " + value);
+        html = replace(html, key + "\\s+", value + " ");
 
-        replaceInWrappedHtmlElement(key, value, "span");
-        replaceInWrappedHtmlElement(key, value, "strong");
-        replaceInWrappedHtmlElement(key, value, "em");
-        replaceInWrappedHtmlElement(key, value, "b");
-        replaceInWrappedHtmlElement(key, value, "i");
+        html = replaceInWrappedHtmlElement(html, key, value, "span");
+        html = replaceInWrappedHtmlElement(html, key, value, "strong");
+        html = replaceInWrappedHtmlElement(html, key, value, "em");
+        html = replaceInWrappedHtmlElement(html, key, value, "b");
+        html = replaceInWrappedHtmlElement(html, key, value, "i");
     });
+
+    $("body").html(html);
 });

@@ -35,27 +35,45 @@ function replaceInWrappedHtmlElement(html, pattern, replacement, wrapperHtmlElem
 }
 
 function doReplace(keywordsDict) {
-    var html = $("body").html();
+    console.log("Start replacement: ", new Date());
+    
+    // https://developer.mozilla.org/en/docs/Web/API/MutationObserver
+    // select the target node
+    var target = document.querySelector('body');
 
-    $.each(keywordsDict, function (key, value) {
-        // console.log("*** Replace: " + key + " with " + value);
+    // create an observer instance
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            console.log(mutation.type);
+        });
+    });
 
-        try {
-            $("body").find(":not(iframe)").addBack().contents().filter(function () {
-                return (this.nodeType === 1 && this.childNodes) && !/(script|style)/i.test(this.tagName);
-            }).each(function () {
-//                var text = $(this).text();
-//                console.log("text: ", text);
-//                console.log("tagName: ", this.tagName);
-            });
+    // configuration of the observer:
+    var config = { attributes: true, childList: true, characterData: true }
 
-//            var keysArr = Object.keys(keywordsDict);
-//            console.log(keysArr);
-//            $("body").highlight(keysArr);
-        } catch (e) {
-            console.log("!!! Error: ", e);
-        }
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
 
+
+//    try {
+//        $("body").find(":not(iframe)").addBack().contents().filter(function () {
+//            return (this.nodeType === 1 && this.childNodes) && !/(script|style)/i.test(this.tagName);
+//        }).each(function () {
+//            console.log("!!! Try to find something ...", new Date());
+//            var text = $(this).text();
+//            if (/(script|style)/ig.test("putin")) {
+//                console.log("!!! text: ", text);
+//                console.log("!!! tagName: ", this.tagName);
+//            }
+//        });
+//    } catch (e) {
+//        console.log("!!! Error: ", e);
+//    }
+
+//    var html = $("body").html();
+//
+//    $.each(keywordsDict, function (key, value) {
+//        console.log("*** Replace: " + key + " with " + value);
 //        html = replace(html, "\\s+" + key, " " + value);
 //        html = replace(html, key + "\\s+", value + " ");
 //
@@ -64,9 +82,9 @@ function doReplace(keywordsDict) {
 //        html = replaceInWrappedHtmlElement(html, key, value, "em");
 //        html = replaceInWrappedHtmlElement(html, key, value, "b");
 //        html = replaceInWrappedHtmlElement(html, key, value, "i");
-    });
-
-    $("body").html(html);
+//    });
+//
+//    $("body").html(html);
 }
 
 // "self" is a global object in content scripts

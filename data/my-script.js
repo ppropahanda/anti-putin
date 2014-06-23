@@ -37,7 +37,10 @@ function replaceInWrappedHtmlElement(html, pattern, replacement, wrapperHtmlElem
 // "self" is a global object in content scripts
 // Listen for a message, and replace the document's
 // contents with the message payload.
-self.port.on("replaceShit", function (keywordsDict) {
+self.port.on("loaded", function (keywordsDict) {
+    var docUrl = document.location.toString();
+    var docTitle = document.title;
+
     var html = $("body").html();
 
     $.each(keywordsDict, function (key, value) {

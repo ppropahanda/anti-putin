@@ -2,8 +2,8 @@
   "name": "anti-putin",
   "title": "anti-putin",
   "id": "jid1-oo3O8nFQgiY9NQ",
-  "description": "a basic add-on",
+  "description": "Anti Putin extension based on Firefox SDK. Protect yourself, your family, friends from Russia propaganda. A little humor can save the world! Enjoy ;-)",
   "author": "Iryna V.",
   "license": "MPL 2.0",
-  "version": "0.2"
+  "version": "0.3"
 }

@@ -2,96 +2,111 @@
 // @author: Iryna V.
 //
 
-function replace(html, pattern, replacement) {
-    var replacedHtml = html;
+// cached regex expressions
+var cachedRegexArr = [];
 
-    try {
-        replacedHtml = html.replace(new XRegExp(pattern, "ig"), replacement);
-    } catch (e) {
-        console.log("!!! Error while replacing '" + pattern + "' with '" + replacement + "'", e);
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+// From: http://davidwalsh.name/javascript-debounce-function
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function () {
+        var context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(function () {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        }, wait);
+        if (immediate && !timeout) func.apply(context, args);
+    };
+};
+
+// Traverse this node and its children to process all text nodes
+function traverse(node, keywordsArr) {
+    // If it is a #TEXT node
+    if (node.nodeType === 3) {
+        var nodeName = node.parentNode.nodeName;
+        var nodeType = node.nodeType;
+        var nodeText = "" + node.nodeValue;
+
+        if (!/(script|style)/i.test(nodeName)
+            && nodeText.trim().indexOf("{") !== 0) {
+
+            keywordsArr.forEach(function (entry) {
+                var regex = entry.regex;
+                var value = entry.value;
+
+                try {
+                    if (regex.test(nodeText)) {
+//                        console.log("+++ " + nodeName + " " + nodeType + " " + nodeText);
+                        node.nodeValue = nodeText.replace(regex, value);
+                    }
+                } catch (e) {
+                    console.log("!!! Error while replacing '" + regex + "' with '" + value + "'", e);
+                }
+            });
+        }
     }
 
-    return replacedHtml;
+    // Get an array with the child nodes
+    var children = node.childNodes;
+
+    // Traverse each of the child nodes
+    for (var i = 0; i < children.length; i++) {
+        traverse(children[i], keywordsArr);
+    }
 }
 
-function replaceInWrappedHtmlElement(html, pattern, replacement, wrapperHtmlElement) {
-    var replacedHtml = html;
-
-    var startElement = "<" + wrapperHtmlElement + "$1>";
-    var endElement = "</" + wrapperHtmlElement + ">";
-    var patternStartElement = "\\<" + wrapperHtmlElement + "([\\s\\w=\\'\"-]*)\\>";
-    var patternEndElement = "\\<\\/" + wrapperHtmlElement + "\\>";
-
-    var fixedPattern = patternStartElement + pattern + patternEndElement;
-    var fixedReplacement = startElement + replacement + endElement;
-
-    try {
-        replacedHtml = html.replace(new XRegExp(fixedPattern, "ig"), fixedReplacement);
-    } catch (e) {
-        console.log("!!! Error while replacing '" + pattern + "' with '" +
-            replacement + "' for '" + wrapperHtmlElement + "' element", e);
+// create array of regex with value to use for replacement
+function getKeywordsRegexArr(keywordsDict) {
+    if (Object.keys(cachedRegexArr).length !== 0) {
+        console.log("Returned cached dictionary");
+        return cachedRegexArr;
     }
 
-    return replacedHtml;
+    for (var key in keywordsDict) {
+//        cachedRegexArr.push({
+//            regex: new XRegExp(key + "(\\w+)", "ig"),
+//            value: keywordsDict[key] + "$1"
+//        });
+
+        cachedRegexArr.push({
+            regex: new XRegExp(key, "ig"),
+            value: keywordsDict[key]
+        });
+    }
+
+    return cachedRegexArr;
 }
 
 function doReplace(keywordsDict) {
-//    console.log("Start replacement: ", new Date());
+    var regexDict = getKeywordsRegexArr(keywordsDict);
+    traverse(document.body, regexDict);
 
     // https://developer.mozilla.org/en/docs/Web/API/MutationObserver
     // select the target node
-//    var target = document.querySelector('body');
-//
-//    // create an observer instance
-//    var observer = new MutationObserver(function (mutations) {
-//        try {
-//            $("body").find(":not(iframe)").addBack().contents().filter(function () {
-//                return (this.nodeType === 1 && this.childNodes) && !/(script|style)/i.test(this.tagName);
-//            }).each(function () {
-////                console.log("!!! Try to find something ...", new Date());
-//                var text = $(this).text();
-//                if (/(script|style)/ig.test("putin")) {
-//                    console.log("!!! text: ", text);
-//                    console.log("!!! tagName: ", this.tagName);
-//                }
-//            });
-//        } catch (e) {
-//            console.log("!!! Error: ", e);
-//        }
-////        mutations.forEach(function (mutation) {
-////            console.log(mutation.type);
-////        });
-//    });
-//
-//    // configuration of the observer:
-//    var config = { attributes: true, childList: true, characterData: true }
-//
-//    // pass in the target node, as well as the observer options
-//    observer.observe(target, config);
+    var target = document.querySelector('body');
 
-    var html = $("body").html();
+    var traverseFn = debounce(function () {
+        var regexDict = getKeywordsRegexArr(keywordsDict);
+        traverse(document.body, regexDict);
+    }, 300);
 
-    $.each(keywordsDict, function (key, value) {
-        console.log("*** Replace: " + key + " with " + value);
-        html = replace(html, "\\s+" + key, " " + value);
-        html = replace(html, key + "\\s+", value + " ");
+    // create an observer instance
+    var observer = new MutationObserver(traverseFn);
 
-        html = replaceInWrappedHtmlElement(html, key, value, "span");
-        html = replaceInWrappedHtmlElement(html, key, value, "strong");
-        html = replaceInWrappedHtmlElement(html, key, value, "em");
-        html = replaceInWrappedHtmlElement(html, key, value, "b");
-        html = replaceInWrappedHtmlElement(html, key, value, "i");
-    });
+    // configuration of the observer:
+    var config = { attributes: false, childList: true, characterData: true }
 
-    $("body").html(html);
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
 }
 
 // "self" is a global object in content scripts
 // Listen for a message, and replace the document's
 // contents with the message payload.
 self.port.on("loaded", function (keywordsDict) {
-    var docUrl = document.location.toString();
-    var docTitle = document.title;
-
     doReplace(keywordsDict);
 });

@@ -9,7 +9,7 @@ var cachedRegexArr = [];
 // be triggered. The function will be called after it stops being called for
 // N milliseconds. If `immediate` is passed, trigger the function on the
 // leading edge, instead of the trailing.
-// From: http://davidwalsh.name/javascript-debounce-function
+// Code copied from: http://davidwalsh.name/javascript-debounce-function
 function debounce(func, wait, immediate) {
     var timeout;
     return function () {
@@ -30,6 +30,7 @@ function traverse(node, keywordsArr) {
         var nodeName = node.parentNode.nodeName;
         var nodeType = node.nodeType;
         var nodeText = "" + node.nodeValue;
+        var wasReplaced = false;
 
         if (!/(script|style)/i.test(nodeName)
             && nodeText.trim().indexOf("{") !== 0) {
@@ -41,12 +42,17 @@ function traverse(node, keywordsArr) {
                 try {
                     if (regex.test(nodeText)) {
 //                        console.log("+++ " + nodeName + " " + nodeType + " " + nodeText);
-                        node.nodeValue = nodeText.replace(regex, value);
+                        nodeText = nodeText.replace(regex, value);
+                        wasReplaced = true;
                     }
                 } catch (e) {
                     console.log("!!! Error while replacing '" + regex + "' with '" + value + "'", e);
                 }
             });
+
+            if (wasReplaced) {
+                node.nodeValue = nodeText;
+            }
         }
     }
 
@@ -67,13 +73,13 @@ function getKeywordsRegexArr(keywordsDict) {
     }
 
     for (var key in keywordsDict) {
-//        cachedRegexArr.push({
-//            regex: new XRegExp(key + "(\\w+)", "ig"),
-//            value: keywordsDict[key] + "$1"
-//        });
+        cachedRegexArr.push({
+            regex: new RegExp(key + "([а-яА-Яa-zA-Z]+)", "i"),
+            value: keywordsDict[key].slice(0, -1) + "$1"
+        });
 
         cachedRegexArr.push({
-            regex: new XRegExp(key, "ig"),
+            regex: new RegExp(key, "i"),
             value: keywordsDict[key]
         });
     }

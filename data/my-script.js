@@ -1,5 +1,6 @@
 //
-// @author: Iryna V.
+// @author: propahanda.org
+// based on Iryna V. version
 //
 
 // cached regex expressions
